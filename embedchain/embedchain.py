@@ -22,6 +22,7 @@ from embedchain.models.data_type import (DataType, DirectDataType,
                                          IndirectDataType, SpecialDataType)
 from embedchain.utils.misc import detect_datatype, is_valid_json_string
 from embedchain.vectordb.base import BaseVectorDB
+from symbol import return_stmt
 
 load_dotenv()
 
@@ -528,6 +529,7 @@ class EmbedChain(JSONSerializable):
         session_id: str = "default",
         where: Optional[dict[str, str]] = None,
         citations: bool = False,
+        return_prompt: bool = False,
         **kwargs: dict[str, Any],
     ) -> Union[tuple[str, list[tuple[str, dict]]], str]:
         """
@@ -579,20 +581,28 @@ class EmbedChain(JSONSerializable):
                 contexts=contexts_data_for_llm_query,
                 config=config,
                 dry_run=dry_run,
+                return_prompt=return_prompt
             )
         else:
             logger.debug("Cache disabled. Running chat without cache.")
             answer = self.llm.chat(
-                input_query=input_query, contexts=contexts_data_for_llm_query, config=config, dry_run=dry_run
+                input_query=input_query, contexts=contexts_data_for_llm_query, config=config, dry_run=dry_run, return_prompt=return_prompt
             )
 
         # add conversation in memory
+        
         self.llm.add_history(self.config.id, input_query, answer, session_id=session_id)
 
         # Send anonymous telemetry
         self.telemetry.capture(event_name="chat", properties=self._telemetry_props)
-
-        if citations:
+        
+        
+        if return_prompt:
+            prompt, answer = answer
+            
+        if return_prompt and citations:
+            return prompt, answer, contexts
+        elif citations:
             return answer, contexts
         else:
             return answer

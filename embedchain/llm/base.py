@@ -232,7 +232,7 @@ class BaseLlm(JSONSerializable):
                 self.config: BaseLlmConfig = BaseLlmConfig.deserialize(prev_config)
 
     def chat(
-        self, input_query: str, contexts: list[str], config: BaseLlmConfig = None, dry_run=False, session_id: str = None
+        self, input_query: str, contexts: list[str], config: BaseLlmConfig = None, dry_run=False, session_id: str = None, return_prompt=False
     ):
         """
         Queries the vector database on the given input query.
@@ -278,6 +278,7 @@ class BaseLlm(JSONSerializable):
                 return prompt
 
             answer = self.get_answer_from_llm(prompt)
+            answer = (prompt, answer) if return_prompt else answer
             if isinstance(answer, str):
                 logger.info(f"Answer: {answer}")
                 return answer
