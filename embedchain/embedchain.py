@@ -590,6 +590,8 @@ class EmbedChain(JSONSerializable):
             )
 
         # add conversation in memory
+        if return_prompt:
+            prompt, answer = answer
         
         self.llm.add_history(self.config.id, input_query, answer, session_id=session_id)
 
@@ -597,8 +599,6 @@ class EmbedChain(JSONSerializable):
         self.telemetry.capture(event_name="chat", properties=self._telemetry_props)
         
         
-        if return_prompt:
-            prompt, answer = answer
             
         if return_prompt and citations:
             return prompt, answer, contexts
