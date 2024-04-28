@@ -30,7 +30,7 @@ class JSONReader:
         else:
             json_data = json_data
 
-        json_output = json.dumps(json_data, indent=0)
+        json_output = json.dumps(json_data, indent=0, ensure_ascii=False)
         lines = json_output.split("\n")
         useful_lines = [line for line in lines if not re.match(r"^[{}\[\],]*$", line)]
         return ["\n".join(useful_lines)]
@@ -55,7 +55,6 @@ class JSONLoader(BaseLoader):
     @staticmethod
     def load_data(content):
         """Load a json file. Each data point is a key value pair."""
-
         JSONLoader._check_content(content)
         loader = JSONReader()
 
